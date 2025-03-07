@@ -28,9 +28,19 @@ const AuthorSchema = new mongoose.Schema({
 });
 
 app.use(express.urlencoded({extended : true}));
-
+app.use(express.json());
 // my Middleware
 app.use(function (req, res, next) {
+    //token extraction following this article's implementation
+    //https://medium.com/@abolfazlmashhadi93/implementing-jwt-authentication-in-express-js-308e57b3fcbd#:~:text=Token%20Extraction%3A%20The%20token%20is,invalid%2C%20an%20error%20is%20returned.
+        const bearerHead = req.headers["authorization"];
+        if (!bearerHead || !bearerHead.startsWith("Bearer ")) {
+            return res.send("where is ur token :scream:");
+        }
+        const token = bearerHead.split(" ")[1];
+        if (token != "Zewail"){
+            return res.send("wrong token :(")
+        }
         console.log("Middleware called", counter++);
         next();
 });
@@ -40,9 +50,10 @@ const Book = mongoose.model('Book', BookScheme , "BooksCollection");
 const User = mongoose.model('User', UserSchema , "UserCollection");
 const Author = mongoose.model('Author', AuthorSchema , "AuthorCollection");
 
-const bookRoutes = require("./routes/books")(Book);
-const userRoutes = require("./routes/users")(User);
+
+const bookRoutes = require("./routes/book")(Book);
 const authorRoutes = require("./routes/authors")(Author);
+const userRoutes = require("./routes/users")(User);
 
 app.use("/books", bookRoutes);
 app.use("/users", userRoutes);
